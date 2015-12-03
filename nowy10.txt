@@ -1,0 +1,165 @@
+#!/usr/bin/env ruby
+ 
+#
+# Implementacja algorytmu Kruskala, z wykorzystaniem struktury zbiorow
+# rozlacznych.
+#
+# www.algorytm.org
+#
+# Graf odczytywany na wejsciu powinien zawierac kilka linii, w kazdej linii
+# powinien znajdowac sie opis jednej krawedzi. Opis krawedzi to trojka napisow
+# oddzielonych bialym znakiem:
+#  * pierwszy to liczba rzeczywista
+#  * drugi to indeks pierwszego konca krawedzi
+#  * trzeci to indeks drugiego konca krawedzi
+# Koniec grafu oznaczony jest przez koniec pliku.
+#
+# Przykladowy graf (opisany w artykule) wyglada nastepujaco:
+#
+#  7 e f
+#  2 a f
+#  6 f d
+#  1 a e
+#  2 b c
+#  4 a b
+#  8 c d
+#  2 b e
+#  3 d e
+#
+# Wynik dzialania algorytmu mozna zwizualizowac za pomoca programu graphviz,
+# uruchamiajac polecenie:
+#
+#   ruby kruskal.rb | dot -og.png -Tpng
+#
+# i wpisujac dane grafu lub polecenie:
+#
+#   ruby kruskal.rb < dane.txt | dot -og.png -Tpng
+#
+# Plik 'dane.txt' powinien zawierac graf wejsciowy. Wynikiem bedzie plik 'g.png'
+# ze zwizualizowanym grafem wejsciowym i zaznaczonym na czerwono drzewem
+# rozpinajacym.
+#
+# Autor: Dawid Fatyga
+#
+ 
+#
+# Klasa Vertex reprezentuje wierzcholek grafu, jednoczesnie implementujac
+# strukture zbiorow rozlacznych.
+#
+# http://en.wikipedia.org/wiki/Disjoint-set_data_structure
+#
+class Vertex
+attr_accessor :name, :parent, :rank
+ 
+def initialize(name)
+self.name = name
+self.rank = 0
+end
+ 
+# Odnajduje reprezentanta danego zbioru rozlacznego, stosujac kompresje
+# sciezki.
+def find
+if self.parent.nil?
+self
+else
+self.parent = parent.find
+end
+end
+ 
+# Scala dwa zbiory rozlaczne, dolaczajac mniejsze drzewo do wiekszego drzewa.
+def union(other)
+self_root = self.find
+other_root = other.find
+ 
+if self_root.rank > other_root.rank
+other_root.parent = self_root
+elsif self_root.rank < other_root.rank
+self_root.parent = other_root
+elsif self_root != other_root
+other_root.parent = self_root
+self_root.rank += 1
+end
+end
+end
+ 
+#
+# Klasa Edge reprezentuje pojedyncza krawedz grafu:
+#  :weight    waga krawedzi
+#  :a         pierwszy koniec krawedzi (instancja klasy Vertex)
+#  :b         drugi koniec krawedzi (instancja klasy Vertex)
+#
+class Edge < Struct.new(:weight, :a, :b)
+#
+# Sprawdza czy konce krawedzi nie naleza do tego samego zbioru, nastepnie
+# laczy zbiory skojarzone z wierzcholkami, a nastepnie zwraca wynik testu.
+#
+# Zbiory sa laczone zawsze, poniewaz wg. algorytmu jesli konce krawedzi
+# naleza do innych zbiorow, to nalezy je polaczyc; laczenie juz polaczonych
+# zbiorow nie wplywa na dzialanie algorytmu.
+#
+def disjoint_ends?
+(a.find != b.find).tap { a.union(b) }
+end
+end
+ 
+class Graph
+def initialize
+@edges = []
+@vertices = {}
+end
+ 
+#
+# Algorytm (http://pl.wikipedia.org/wiki/Algorytm_Kruskala):
+#
+#  1. Utworz las L z wierzcholkow oryginalnego grafu - kazdy wierzcholek jest na poczatku osobnym drzewem.
+#  2. Utworz zbior S zawieraj¹cy wszystkie krawedzie oryginalnego grafu.
+#  3. Dopoki S nie jest pusty:
+#     4. Wybierz i usun z S krawedz o minimalnej wadze.
+#     5. Jesli krawedz ta laczyla dwa rozne drzewa, to dodaj ja do lasu L, tak aby polaczyla dwa odpowiadaj¹ce drzewa w jedno.
+#     6. W przeciwnym wypadku odrzuc ja
+#
+#  Po zakonczeniu algorytmu L jest minimalnym drzewem rozpinaj¹cym.
+#
+def kruskal(input=$stdin)
+ 
+# W tym miejscu
+#  * @edges jest zainicjalizowane pusta lista []
+#  * @vertices jest zainicjalizowane pusta tablica haszujaca {}
+ 
+until (line = input.gets).nil?
+w, a, b = line.split(/\s+/)
+ 
+# Instancje klasy Vertex sa zapamietywane w tablicy haszujacej byly
+# inicjalizowane tylko jeden raz.
+@vertices[a] ||= Vertex.new(a)
+@vertices[b] ||= Vertex.new(b)
+ 
+@edges.push(Edge.new(Float(w), @vertices[a], @vertices[b]))
+end
+ 
+# W tym miejscu:
+#  * @edges to zbior S zawierajacy wszystkie krawedzie grafu
+#  * @vertices to las L z wierzcholkow grafu
+ 
+# Zbior krawedzi S jest sortowany wg. wag; metoda select iteruje
+# po wynikowej tablicy wybierajac krawedzie, dla ktorych metoda
+# :disjoint_ends? zwroci wartosc 'true' (ktora to jednoczesnie laczy
+# wszystkie napotkane zbiory rozlaczne).
+#
+# W Wyniku zwracana jest lista krawedzi nalezaca do drzewa rozpinajacego.
+@edges.sort_by(&:weight).select(&:disjoint_ends?)
+end
+ 
+# Zwraca reprezentacje grafu w postaci ciagu znakow, w jezyku dot; krawedzie
+# nalezace do drzewa rozpinajacego zostana pokolorowane na czerwono
+def to_s(spanning_tree = [])
+@edges.map do |edge|
+out = "#{edge.a.name} -- #{edge.b.name}"
+out += " [color = red]" if spanning_tree.include?(edge)
+out
+end.join("\n")
+end
+end
+ 
+graph = Graph.new
+spanning_tree = graph.kruskal

@@ -1,0 +1,23 @@
+//Plik: nazwaPliku.hpp
+#ifndef nazwaPliku_hpp
+#define nazwaPliku_hpp
+#include <iostream>
+//definicja struktur ---------
+struct BokiTrojkata
+{
+    double bokA;
+    double bokB;
+    double bokC;
+    bool czy_prawda;
+};
+struct WynikiTrojkata
+{
+    double Wynik1;
+    double Wynik2;
+    double Wynik3;
+    bool czy_prawda;
+};
+//definicje funkcji-----------
+WynikiTrojkata TwierdzeniePitagorasa( BokiTrojkata pobiezboki );
+void WyswietlWyniki( const WynikiTrojkata wynik );
+#endif

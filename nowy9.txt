@@ -1,0 +1,18 @@
+class Sortowanie
+{
+    public static void Sortuj(int[] tablica, int liczbaElementow)
+    {
+        //kod
+    }
+
+    public static void Sortuj(double[] tablica, int liczbaElementow)
+    {
+        //kod
+    }
+
+    public static void Sortuj(string[] tablica, int liczbaElementow)
+    {
+        //kod
+    }
+
+}

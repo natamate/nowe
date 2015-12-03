@@ -1,0 +1,251 @@
+//Plik: nazwaPliku.cpp
+#include "nazwaPliku.hpp"
+#include "ddtconsole.h"
+//FUNKCJE APLIKACJI --------------------------------------------------------------
+//funkcja wyœwietlaj¹ca wprowadzone dane
+void Wyswietl_Dane( std::string const tabela1[][ BILETY ], int indeks1, const int tabela2[], int indeks2 )
+{
+    using namespace ddt::console;
+    using std::cout;
+    std::string Miasta[ 6 ] = { "Barcelona", "Londyn", "Paryz",
+        "New York", "Moskwa", "Tokyo" };
+    clrscr();
+    gotoxy( 5, 5 );
+    textcolor( 10 );
+    cout << "Oto Dane dla linii lotniczych\n";
+    textcolor( 11 );
+    for( int i = 0; i < indeks2; i++ ) {
+        //sprawdza czy w tabeli s¹ dane je¿eli wiêksze od -1 to dane s¹ wprowadzone
+        if( tabela2[ i ] != - 1 ) {
+            cout << "-----------------------------\n";
+            textcolor( 10 );
+            cout << Miasta[ i ] << "\n";
+            textcolor( 11 );
+            for( int j = 0; j <= tabela2[ i ]; j++ ) {
+                cout << tabela1[ i ][ j ] << "\n";
+            }
+            cout << "-----------------------------\n";
+        }
+    }
+    // pod Linuxem system(
+    //wyœwietla komunikat systemowy i robi pauzê
+    system( "pause" );
+}
+//funkcja odpowiadaj¹ca za kursor (strza³kê) dok³adnie jej pozycja na ekranie
+void Kursor( int pion, int poziom )
+{
+    using namespace ddt::console;
+    using std::cout;
+    using std::endl;
+    gotoxy( pion, poziom );
+    textcolor( 7 );
+    cout << "->" << endl;
+}
+// funkcja wprowadzaj¹ca dane do tabeli
+int BazaLotow( std::string tabela1[][ BILETY ], int indeks1 )
+{
+    using namespace ddt::console;
+    using std::cin;
+    using std::cout;
+    std::string bufor;
+    int bilety;
+    int straznik = BILETY;
+    int licz = 0;
+    //glowna pêtla wprowadzania
+    for( licz; licz < straznik; licz++ ) {
+        clrscr();
+        gotoxy( 20, 8 );
+        textcolor( 15 );
+        cout << "Literki 'q' i 'Q' - koncza wprowadzenie!\n\n";
+        cout << "Imie i nazwisko klienta: ";
+        //pobiera dana dla danego miasta--------------------
+        getline( cin, tabela1[ indeks1 ][ licz ] );
+        if( tabela1[ indeks1 ][ licz ] == "q" || tabela1[ indeks1 ][ licz ] == "Q" ) {
+            tabela1[ indeks1 ][ licz ] = "\0";
+            return licz - 1;
+        }
+        gotoxy( 20, 12 );
+        cout << "Liczba ujemna przerywa wprowadzanie\n";
+        cout << "Ile biletow: ";
+        ( cin >> bilety ).get();
+        // sprawdza czy zosta³a podana liczba
+        if( !cin ) //kontrola danych
+        { // czyœci strumieñ
+            cin.clear();
+            gotoxy( 20, 19 );
+            cout << "Nie podano liczby!!! Restart!";
+            //robi pauzê na czas podanyc w milisekundach
+            Sleep( 4000 );
+            return licz - 1;
+        }
+        // je¿eli zosta³¹ podana liczba ujemna przerywa
+        else if( bilety <= 0 ) {
+            if( bilety == 0 ) {
+                // ustawiono ¿e dla zera bilet automatycznie jest równy 1
+                bilety = 1;
+            } else {
+                // zeruje tabele bo wprowadzono imienie i nazwisko
+                tabela1[ indeks1 ][ licz ] = "\0";
+                return licz - 1;
+            }
+            //sprawdza ile jest dostêpnych biletów
+        } if( straznik >= bilety ) {
+            straznik -= bilety;
+            bufor = ", ilosc biletow: ";
+            tabela1[ indeks1 ][ licz ] += bufor;
+            bufor = 'a'; //wprowadzam znak by usun¹æ z bufora poprzedni ³ancuch
+            // zamienia liczbe int na ³ancuch string
+            std::sprintf(( char * ) bufor.c_str(), "%d", bilety );
+            //³opatologiczne rozwi¹zanie problemu wpisania do tabeli sring liczby 10
+            if( bilety == 10 ) {
+                tabela1[ indeks1 ][ licz ] += bufor;
+                tabela1[ indeks1 ][ licz ] += '0';
+            } else
+                 tabela1[ indeks1 ][ licz ] += bufor;
+           
+        } else {
+            cout << "\nPrzekroczono liczbe biletow!!!\n"
+            << "Zostalo ich tylko - " << straznik;
+            //robi pauzê na czas podanyc w milisekundach
+            Sleep( 5000 );
+            licz -= 1;
+        }
+    }
+    return licz - 1;
+}
+//funkcja do nawigacji  i obs³ugi menu ----
+int OperacjeKasjera() {
+    using namespace ddt::console;
+    using std::cout;
+    using std::cin;
+    using std::endl;
+    int znak;
+    int pion = 17;
+    int poziom = 12;
+    // nawigacja kursorem-----------
+    do
+    {
+        Kursor( pion, poziom );
+        znak = getch();
+        /*    cout << znak
+                  << " -- "
+                  << (int)znak;*/
+        // u¿ycie strza³ek to tak naprawde dwa znaki dlatego nale¿y usun¹æ pierwsz znak
+        if( znak == 224 || znak == 0 )
+             znak = getch();
+       
+        switch( znak )
+        { // strzalka w dó³
+        case 80:
+            {
+                gotoxy( pion, poziom );
+                cout << "  " << endl;
+                if( poziom == 14 )
+                     poziom = 11;
+                else
+                     poziom++;
+               
+            } break;
+           
+        case 72:
+            { //strza³ka w górê
+                gotoxy( pion, poziom );
+                cout << "  " << endl;
+                if( poziom == 11 )
+                     poziom = 14;
+                else
+                     poziom--;
+               
+            } break;
+           
+        case 77:
+            { //strza³ka w prawo
+                gotoxy( pion, poziom );
+                cout << "  " << endl;
+                if( pion == 17 ) {
+                    pion = 37;
+                } else
+                     pion -= 20;
+               
+            } break;
+           
+        case 75:
+            { //strza³ka w lewo
+                gotoxy( pion, poziom );
+                cout << "  " << endl;
+                if( pion == 37 )
+                     pion = 17;
+                else
+                     pion += 20;
+               
+            } break;
+            //jeœli ENTER to
+        case 13:
+            { // w zaleŸnoœci od pozycji strza³ki taka opcja bêdzie wybrana
+                if( poziom == 11 && pion == 17 )
+                     return 0;
+                else if( poziom == 12 && pion == 17 )
+                     return 1;
+                else if( poziom == 13 && pion == 17 )
+                     return 2;
+                else if( poziom == 14 && pion == 17 )
+                     return 3;
+                else if( poziom == 11 && pion == 37 )
+                     return 4;
+                else if( poziom == 12 && pion == 37 )
+                     return 5;
+                else if( poziom == 13 && pion == 37 )
+                     return 6;
+                else if( poziom == 14 && pion == 37 )
+                     return 27;
+               
+            } break;
+            /*       default:
+                   {
+                      //clrscr();
+                      cout << "eror" << endl;
+                   } break;*/
+        }
+        //Gdy ESC to koniec
+    } while( znak != 27 );
+   
+    return znak;
+}
+// menu aplikacji-------------
+void Menu() {
+    using namespace ddt::console;
+    using std::cout;
+    using std::endl;
+    //czyœci ekran
+    clrscr();
+    //ustawia pozycjê
+    gotoxy( 30, 8 );
+    //zmienia kolor czcionki
+    textcolor( 10 );
+    cout << "Linie AirDDT" << endl;
+    gotoxy( 20, 11 );
+    textcolor( 11 );
+    cout << "1 - Barcelona" << endl;
+    gotoxy( 20, 12 );
+    textcolor( 12 );
+    cout << "2 - Londyn" << endl;
+    gotoxy( 20, 13 );
+    textcolor( 13 );
+    cout << "3 - Paryz" << endl;
+    gotoxy( 20, 14 );
+    textcolor( 14 );
+    cout << "4 - New York" << endl;
+    gotoxy( 40, 11 );
+    textcolor( 15 );
+    cout << "5 - Moskwa" << endl;
+    gotoxy( 40, 12 );
+    textcolor( 13 );
+    cout << "6 - Tokyo" << endl;
+    gotoxy( 40, 13 );
+    textcolor( 11 );
+    cout << "7 - Wszystkie linie" << endl;
+    gotoxy( 40, 14 );
+    textcolor( 10 );
+    cout << "8 - Przerwa" << endl;
+    gotoxy( 30, 20 );
+    textcolor( 11 );

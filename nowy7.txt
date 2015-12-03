@@ -1,0 +1,15 @@
+//Plik: nazwaPliku.hpp
+#ifndef nazwaPliku_hpp
+#define nazwaPliku_hpp
+#include <iostream>
+#include <conio.h>
+#include <string>
+//sta³a
+const int BILETY = 10;
+//definicje funkcji-----------
+void Kursor( int, int );
+void Menu();
+void Wyswietl_Dane( const std::string[][ BILETY ], int, const int[], int );
+int BazaLotow( std::string tabela1[][ BILETY ], int indeks1 );
+int OperacjeKasjera();
+#endif

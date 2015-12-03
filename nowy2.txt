@@ -1,0 +1,20 @@
+//Plik: main.cpp
+#include "nazwaPliku.hpp"
+//funkcja g³ówna -------------
+int main()
+{
+    using std::cout;
+    using std::cin;
+    //tworzenie obiektów struktur
+    BokiTrojkata wprowadzDane;
+    WynikiTrojkata wyswietl;
+   
+    cout << "Wprowadz dana bokow a, b i c: ";
+    //sprytny sposób wprowadzania danych
+    while( cin >> wprowadzDane.bokA >> wprowadzDane.bokB >> wprowadzDane.bokC )
+    {
+        wyswietl = TwierdzeniePitagorasa( wprowadzDane );
+        WyswietlWyniki( wyswietl );
+        cout << "\nPodaj ponownie boki lub 'k' by wyjsc.\n";
+    }
+    return 0;

@@ -1,0 +1,27 @@
+//Plik: main.cpp
+#include "nazwaPliku.hpp"
+//funkcja g³ówna -------------
+int main()
+{
+    using std::string;
+    const int LINIE = 6;
+    string LotyKlient[ LINIE ][ BILETY ];
+    int max_wierszy = 0;
+    // tabela która bêdzie przechowywaæ informacje dla których miast zosta³y zakupione bilety
+    int tab_wiersze[ 6 ] = { - 1, - 1, - 1, - 1, - 1, - 1 };
+    Menu();
+    //pêtla zakoñczy siê gdy Funkcja OperacjeKasjera zwróci wartoœæ 27 (jest wartoœci¹ klawisza ESC)
+    while(( max_wierszy = OperacjeKasjera() ) != 27 ) {
+        //sprawdza jaka opcja z menu zosta³a wybrana
+        if( max_wierszy != 27 && max_wierszy != - 1 && max_wierszy != 6 ) {
+            //je¿eli od 0 - 5 to wprowadzamy dana dla wybranego lotu(miasta)
+            tab_wiersze[ max_wierszy ] = BazaLotow( LotyKlient, max_wierszy );
+        } else if( max_wierszy == 6 ) {
+            //je¿eli 6 to wyœwietlamy dana dla wszystkich lotów
+            Wyswietl_Dane( LotyKlient, LINIE, tab_wiersze, LINIE );
+        }
+        //powrót do menu
+        Menu();
+    }
+    return 0;
+}
